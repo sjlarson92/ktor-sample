@@ -3,6 +3,7 @@ package com.example
 import com.example.model.*
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
@@ -34,6 +35,23 @@ fun Application.configureRouting() {
             call.respondText(
                 contentType = ContentType.parse("text/html"),
                 text = tasks.tasksAsTable()
+            )
+        }
+
+        post("/tasks") {
+            val requestBody = call.receiveParameters()
+
+            val newTask = Task(
+                name = requestBody["name"] ?: "",
+                description = requestBody["description"] ?: "",
+                priority = Priority.valueOf(requestBody["priority"] ?: "Low")
+                )
+
+            TaskRepository.addTask(newTask)
+
+            call.respondText(
+                contentType = ContentType.parse("text/html"),
+                text = "new Task created: $newTask"
             )
         }
     }
